@@ -2,25 +2,39 @@ using AdeAuth.Services;
 using AdeAuth.Services.AuthServices;
 using AdeAuth.Services.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var newUsers = DeployConfiguration.AddNewUsers();
+var azureAd = builder.Configuration.GetSection("AzureAd");
+var x = azureAd.GetValue<string>("Scopes");
 // Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApi(options =>
+        .AddJwtBearer(options => {
+        options.SaveToken = true;
+        options.MetadataAddress = "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
+        options.TokenValidationParameters = new TokenValidationParameters()
         {
-            builder.Configuration.Bind("AzureAd", options);
-            options.TokenValidationParameters.NameClaimType = "name";
-        }, options => { builder.Configuration.Bind("AzureAd", options); });
+            NameClaimType = "name",
+            ValidAudience = "c7353b92-fa70-41f9-9ca5-8dc6ceb15dca",
+            ValidIssuer = "https://login.microsoftonline.com/fa23820c-5ae0-43de-968f-69e872bc6200/v2.0",
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true
+        };});
 builder.Services.AddAuthorization(config =>
 {
-    config.AddPolicy("AuthZPolicy", policyBuilder =>
-        policyBuilder.Requirements.Add(new ScopeAuthorizationRequirement() { RequiredScopesConfigurationKey = "User.Read" }));
+    config.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+   .RequireAuthenticatedUser().Build();
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -57,6 +71,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordManager, PasswordManager>();
 builder.Services.AddScoped<IUserRepository>((_) => new UserRepository(newUsers));
+
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

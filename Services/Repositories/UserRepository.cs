@@ -19,9 +19,14 @@ namespace AdeAuth.Services.Repositories
             return _users.FirstOrDefault(s => s.Id == id);
         }
 
+        public User? GetUserByEmail(string email,AuthenticationType authenticationType)
+        {
+            return _users.FirstOrDefault(s => s.Email == email && s.AuthenticationType == authenticationType );
+        }
+
         public User? GetUserByEmail(string email)
         {
-            return _users.FirstOrDefault(s => s.Email == email );
+            return _users.FirstOrDefault(s => s.Email == email);
         }
 
         public readonly IList<User> _users;

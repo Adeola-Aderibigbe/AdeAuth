@@ -4,6 +4,7 @@ using AdeAuth.Services.AuthServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web.Resource;
 using System.Security.Claims;
 
 namespace AdeAuth.Controllers
@@ -12,7 +13,7 @@ namespace AdeAuth.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        public AuthenticationController(IAuthService authService)
+        public AuthenticationController(IAuthService authService, IHttpContextAccessor httpContext)
         {
             _authService = authService;
         }
@@ -28,14 +29,14 @@ namespace AdeAuth.Controllers
             return BadRequest("Failed to register");
         }
 
-        [Authorize(Policy = "AuthZPolicy")]
+        [Authorize()]
         [HttpPost("account")]
         public IActionResult SingleSignOn()
         {
-            var email = HttpContext.User.FindFirstValue("email");
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
             var name = HttpContext.User.FindFirstValue("name")?.Split(' ');
 
-            var currentUser = _authService.IsUserExist(email);
+            var currentUser = _authService.IsUserExist(email,AuthenticationType.Microsoft);
 
             Guid userId = new();
             if(currentUser == null)

@@ -13,9 +13,9 @@ namespace AdeAuth.Services.AuthServices
            _userRepository = userRepository;
            _passwordManager = passwordManager;
         }
-        public string LoginUser(LoginDto loginDto)
+        public string LoginUser(LoginDto loginDto, AuthenticationType authenticationType = AuthenticationType.Default)
         {
-            var currentUser = _userRepository.GetUserByEmail(loginDto.Email);
+            var currentUser = _userRepository.GetUserByEmail(loginDto.Email,authenticationType);
             if(currentUser == null)
             {
                 return "Invalid email/password";
@@ -30,9 +30,9 @@ namespace AdeAuth.Services.AuthServices
             return "Invalid email/password";
         }
 
-        public Guid SignUpUser(SignUpDto signUpDto, AccountType accountType, AuthenticationType authenticationType)
+        public Guid SignUpUser(SignUpDto signUpDto, AccountType accountType, AuthenticationType authenticationType = AuthenticationType.Default)
         {
-            var currentUser = _userRepository.GetUserByEmail(signUpDto.Email);
+            var currentUser = _userRepository.GetUserByEmail(signUpDto.Email,authenticationType);
             if (currentUser == null)
             {
                 var newUser = new User(signUpDto.FirstName, signUpDto.LastName, signUpDto.Email, accountType, authenticationType);
@@ -46,9 +46,9 @@ namespace AdeAuth.Services.AuthServices
             return new Guid();
         }
 
-        public User? IsUserExist(string email)
+        public User? IsUserExist(string email, AuthenticationType authenticationType = AuthenticationType.Default)
         {
-            return _userRepository.GetUserByEmail(email);
+            return _userRepository.GetUserByEmail(email,authenticationType);
         }
 
         public string[] DecryptData(string data)
