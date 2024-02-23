@@ -2,10 +2,7 @@ using AdeAuth.Services;
 using AdeAuth.Services.AuthServices;
 using AdeAuth.Services.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
-using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -13,7 +10,6 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 var newUsers = DeployConfiguration.AddNewUsers();
 var azureAd = builder.Configuration.GetSection("AzureAd");
-var x = azureAd.GetValue<string>("Scopes");
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -72,6 +68,10 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordManager, PasswordManager>();
 builder.Services.AddScoped<IUserRepository>((_) => new UserRepository(newUsers));
 
+builder.Services.AddCors(option =>
+{
+    option.AddPolicy("Policy", c => c.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+});
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -88,6 +88,8 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors("Policy");
 
 app.UseAuthentication();
 
