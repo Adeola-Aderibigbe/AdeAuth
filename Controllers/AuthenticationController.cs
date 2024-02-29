@@ -46,7 +46,7 @@ namespace AdeAuth.Controllers
                     AuthenticationType.Microsoft);
             }
             var result = _authService.Encrypt(email, userId.ToString(), AccountType.User.ToString());
-            Response.Cookies.Append("AdeAuth", result);
+            AppendCookie(result);
             return Ok("Hello user");
         }
 
@@ -57,8 +57,17 @@ namespace AdeAuth.Controllers
             if (result == "Invalid email/password")
                 return BadRequest(result);
 
-            Response.Cookies.Append("AdeAuth", result);
+            AppendCookie(result);
             return Ok("Hello user");
+        }
+
+        private void AppendCookie(string token)
+        {
+            Response.Cookies.Append("AdeAuth", token, new CookieOptions() 
+            {
+                HttpOnly = true,
+                MaxAge = new TimeSpan(1, 0, 0, 0)
+            });
         }
 
         private readonly IAuthService _authService;
