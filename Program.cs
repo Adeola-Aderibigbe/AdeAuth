@@ -70,7 +70,9 @@ builder.Services.AddScoped<IUserRepository>((_) => new UserRepository(newUsers))
 
 builder.Services.AddCors(option =>
 {
-    option.AddPolicy("Policy", c => c.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod());
+    option.AddPolicy("Policy", c => c.WithOrigins("http://localhost:3000")
+    .AllowAnyHeader()
+    .AllowAnyMethod());
 });
 builder.Services.AddHttpContextAccessor();
 

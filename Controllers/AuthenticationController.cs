@@ -66,7 +66,9 @@ namespace AdeAuth.Controllers
             Response.Cookies.Append("AdeAuth", token, new CookieOptions() 
             {
                 HttpOnly = true,
-                MaxAge = new TimeSpan(1, 0, 0, 0)
+                MaxAge = new TimeSpan(1, 0, 0, 0),
+                Secure = true,
+                SameSite = SameSiteMode.None
             });
         }
 
