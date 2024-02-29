@@ -67,7 +67,7 @@ namespace AdeAuth.Controllers
             {
                 HttpOnly = true,
                 MaxAge = new TimeSpan(1, 0, 0, 0),
-                Secure = true,
+                Secure = false,
                 SameSite = SameSiteMode.None
             });
         }
